@@ -6,13 +6,13 @@ Globals:
       Variables:
         ServiceTable: !Join [ '', [ 'Service'] ]
         MockTable: !Join [ '', [ 'Mock'] ]
-  Api:
-    TracingEnabled: True
-    MethodSettings:
-      - MetricsEnabled: False
-        DataTraceEnabled: True
-        ResourcePath: "/*"
-        HttpMethod: "*"
+  # Api:
+  #   TracingEnabled: True
+  #   MethodSettings:
+  #     - MetricsEnabled: False
+  #       DataTraceEnabled: True
+  #       ResourcePath: "/*"
+  #       HttpMethod: "*"
 
 Parameters:
   ServiceSubDomainName:

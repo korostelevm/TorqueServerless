@@ -1,0 +1,128 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Serverless Express Microfrontend
+
+Parameters:
+  GitToken: 
+    Type: String
+    Default: '{{resolve:secretsmanager:AivaDevopsSecrets:SecretString:git_token}}'
+ 
+      
+Resources:
+
+  CodeBuildProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: TorqueServerless
+      ServiceRole: !Ref CodeBuildRole
+      Artifacts:
+        Type: NO_ARTIFACTS
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:5.0
+      Source:
+        Type: GITHUB
+        Location: https://github.com/korostelevm/TorqueServerless.git
+      
+      Triggers:
+        Webhook: true
+        FilterGroups:
+          # - - Type: EVENT
+          #     Pattern: PULL_REQUEST_CREATED,PULL_REQUEST_UPDATED
+          #   - Type: BASE_REF
+          #     Pattern: ^refs/heads/master$
+          #     ExcludeMatchedPattern: false
+            # - Type: ACTOR_ACCOUNT_ID
+            #   Pattern: 12345
+            #   ExcludeMatchedPattern: true
+          - - Type: EVENT
+              Pattern: PUSH
+            - Type: HEAD_REF
+              Pattern: ^refs/heads/master
+            # - Type: FILE_PATH
+            #   Pattern: READ_ME
+
+  CodeBuildRole: {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "Path": "/",
+        "Policies": [
+          {
+            "PolicyName": "CodeBuildAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Action": [
+                    "logs:*",
+                    "iam:UpdateAssumeRolePolicy",
+                    "s3:*",
+                    "ssm:*",
+                    "codebuild:*",
+                    "codedeploy:*",
+                    "apigateway:*",
+                    "cloudformation:*",
+                    "cloudfront:*",
+                    "cloudwatch:*",
+                    "dynamodb:*",
+                    "events:*",
+                    "timestream:*",
+                    "firehose:*",
+                    "athena:*",
+                    "glue:*",
+                    "iam:AddRoleToInstanceProfile",
+                    "iam:AttachRolePolicy",
+                    "iam:CreateInstanceProfile",
+                    "iam:CreatePolicy",
+                    "iam:CreateRole",
+                    "iam:CreateServiceLinkedRole",
+                    "iam:DeleteInstanceProfile",
+                    "iam:DeleteRole",
+                    "iam:DeleteRolePolicy",
+                    "iam:DetachRolePolicy",
+                    "iam:Get*",
+                    "iam:List*",
+                    "iam:PassRole",
+                    "iam:PutRolePolicy",
+                    "iam:RemoveRoleFromInstanceProfile",
+                    "iam:TagRole",
+                    "iam:UpdateAssumeRolePolicy",
+                    "iam:UpdateRoleDescription",
+                    "kms:List*",
+                    "lambda:*",
+                    "route53:*",
+                    "route53domains:*",
+                    "sns:*",
+                    "sqs:*",
+                    "states:*",
+                    "serverlessrepo:*",
+                    "secretsmanager:GetSecretValue"
+                  ],
+                  "Resource": "*",
+                  "Effect": "Allow"
+                }
+              ]
+            }
+          }
+        ],
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Action": [
+                "sts:AssumeRole"
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "codebuild.amazonaws.com",
+                  "lambda.amazonaws.com"
+                ]
+              }
+            }
+          ]
+        }
+      }
+    }

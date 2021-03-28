@@ -1,0 +1,119 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Globals:
+  Function:
+    Environment:
+      Variables:
+        ServiceTable: !Join [ '', [ 'Service'] ]
+        MockTable: !Join [ '', [ 'Mock'] ]
+  Api:
+    TracingEnabled: True
+    MethodSettings:
+      - MetricsEnabled: False
+        DataTraceEnabled: True
+        ResourcePath: "/*"
+        HttpMethod: "*"
+
+Parameters:
+  ServiceSubDomainName:
+    Type: String
+    Default: 'torque'
+  RootUrl:
+    Type: String
+    Default: '{{resolve:ssm:/account/root-url:1}}'
+  SslCert: 
+    Type: String
+    Default: '{{resolve:ssm:/account/ssl-cert:1}}'
+  Namespace:
+    Type: String
+    Default: ''
+
+  Resources:
+    Builder:
+      Type: AWS::Serverless::Application
+      Properties:
+        Location: ./builder.yaml
+        
+    ServiceApi:
+      Type: AWS::Serverless::Api
+      Properties:
+        DefinitionUri: ./api.yaml
+        StageName: Prod
+        Variables:
+          ServiceApiFunction: !Ref ServiceApiFunction
+    
+    APIBasePathMapping:
+        Condition: MakeMapping
+        Type: 'AWS::ApiGateway::BasePathMapping'
+        Properties:
+          Stage: Prod
+          DomainName: !Ref APIDomainName
+          RestApiId: !Ref RestApiId
+    
+    APIDomainName:
+      Type: 'AWS::ApiGateway::DomainName'
+      Properties:
+        SecurityPolicy: TLS_1_2
+        RegionalCertificateArn:
+          Ref: SslCert
+        DomainName:
+          Fn::Join: [ '', [ Ref: ServiceSubDomainName, Ref: Namespace, '.', Ref: RootUrl ] ]
+        EndpointConfiguration:
+          Types: ['REGIONAL']
+    
+    APIDomain:
+      Type: 'AWS::Route53::RecordSetGroup'
+      Properties:
+        HostedZoneName:
+          Fn::Join: [ '', [ Ref: RootUrl, '.' ] ]
+        RecordSets:
+          - Name:
+              Ref: APIDomainName
+            Type: A
+            AliasTarget:
+              DNSName:
+                Fn::GetAtt: [APIDomainName, RegionalDomainName]
+              HostedZoneId:
+                Fn::GetAtt: [APIDomainName, RegionalHostedZoneId]
+
+                
+    ServiceApiFunction:
+      Type: AWS::Serverless::Function
+      Properties:
+        CodeUri: ./service
+        Handler: service.handler
+        Tracing: Active
+        MemorySize: 1024
+        # Role: !GetAtt LambdaExecutionRole.Arn
+        Runtime: nodejs10.x
+        Timeout: 30
+        Policies:
+          - Statement:
+              [{
+                  "Effect": "Allow",
+                  "Action": ["dynamodb:*"],
+                  "Resource": "*"
+              }]
+        # Environment:
+        #   Variables:
+        #     CosmosDbConnectionString: !Ref CosmosDbConnectionString
+        Events:
+          ProxyApiRoot:
+            Type: Api
+            Properties:
+              RestApiId: !Ref ServiceApi
+              Path: /
+              Method: ANY
+          ProxyApiGreedy:
+            Type: Api
+            Properties:
+              RestApiId: !Ref ServiceApi
+              Path: /{proxy+}
+              Method: ANY
+              
+ 
+Outputs:
+  APIDomainName:
+    Description: 'API domain name'
+    Value:
+      Ref: APIDomainName

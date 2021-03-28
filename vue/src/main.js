@@ -1,11 +1,8 @@
 import Vue from 'vue'
 import App from './App.vue'
 import './components/_globals'
+import vueCustomElement from 'vue-custom-element'
 Vue.use(vueCustomElement);
-
-// const Home = { template: '<div>This is Home</div>' }
-// const Foo = { template: '<div>This is Foo</div>' }
-// const Bar = { template: '<div>This is Bar {{ $route.params.id }}</div>' }
 
 
 Vue.prototype.$api = '/api'

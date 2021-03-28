@@ -5,14 +5,30 @@ date = $(shell date '+%Y-%m-%d')
 app_name = TorqueServerless
 
 
+.PHONY: install
+install: 
+	@cd service && npm install
+	@cd vue && npm install
+
 .PHONY: test
 test: 
 	@echo ${BUCKET}
+
+.PHONY: local
+local: 
+	@open http://localhost:1111
+	@cd vue && node ./node_modules/@vue/cli-service/bin/vue-cli-service.js serve --port 1111
+
+.PHONY: frontend
+frontend: 
+	@cd vue && npm run build
+	@aws s3 cp ./vue/dist s3://torque.coldlambda.com --recursive  
 
 .PHONY: build
 build: 
 	@rm -rf .aws-sam
 	@sam build
+
 
 .PHONY: package
 package: build

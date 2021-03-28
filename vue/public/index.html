@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  
+  <head>
+  <style>
+  </style>
+  <script>
+    var host = window.location.hostname;
+  </script>
+  <style>
+    body{
+      margin: 0;
+      /* background: black; */
+    }
+  </style>
+</head>
+<body>
+
+<div id='ui-container'></div>
+
+
+  <script>
+    if (host == "localhost") {
+      sessionStorage.setItem('user',JSON.stringify({
+          id_token:'this is an auth token placehodler'
+      }))
+    }
+    var script = document.createElement('script');
+    script.src = '/public/microfrontend.js';
+    document.head.appendChild(script);
+    document.getElementById('ui-container').appendChild(document.createElement('express-lambda-ui'));
+  </script>
+
+</body>
+
+
+</html>

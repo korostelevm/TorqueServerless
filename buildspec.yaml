@@ -1,0 +1,64 @@
+version: 0.2
+
+# run-as: Linux-user-name
+
+env:
+  variables:
+    SAM_CLI_TELEMETRY: 0
+        
+phases:
+  install:
+    commands:
+      - make install
+      - make frontend
+  build:
+    # run-as: Linux-user-name
+    commands:
+      - ls -lah
+      - echo hello
+      - env | sort
+      - whoami
+      - make deploy
+    finally:
+      - echo bye
+  # post_build:
+  #   run-as: Linux-user-name
+  #   commands:
+  #     - command
+  #     - command
+  #   finally:
+  #     - command
+  #     - command
+# reports:
+#   report-group-name-or-arn:
+#     files:
+#       - location
+#       - location
+#     base-directory: location
+#     discard-paths: no | yes
+#     file-format: report-format
+# artifacts:
+#   files:
+#     - location
+#     - location
+#   name: artifact-name
+#   discard-paths: no | yes
+#   base-directory: location
+#   secondary-artifacts:
+#     artifactIdentifier:
+#       files:
+#         - location
+#         - location
+#       name: secondary-artifact-name
+#       discard-paths: no | yes
+#       base-directory: location
+#     artifactIdentifier:
+#       files:
+#         - location
+#         - location
+#       discard-paths: no | yes
+#       base-directory: location
+# cache:
+#   paths:
+#     - path
+#     - path

@@ -155,13 +155,13 @@ Resources:
         - Key: owasp-waf
           Value: secure
 
-  # SiteAliases:
-  #   Type: AWS::Route53::RecordSetGroup
-  #   Properties:
-  #     HostedZoneName: !Join [ '', [ !Ref RootUrl, '.' ] ]
-  #     RecordSets:
-  #       - Name: !Join [ '', [ !Ref ServiceSubDomainName, '.', !Ref RootUrl ] ]
-  #         Type: A
-  #         AliasTarget:
-  #           DNSName: !GetAtt 'TorqueCloudFront.DomainName'
-  #           HostedZoneId: Z2FDTNDATAQYW2
+  SiteAliases:
+    Type: AWS::Route53::RecordSetGroup
+    Properties:
+      HostedZoneName: !Join [ '', [ !Ref RootUrl, '.' ] ]
+      RecordSets:
+        - Name: !Join [ '', [ !Ref ServiceSubDomainName, '.', !Ref RootUrl ] ]
+          Type: A
+          AliasTarget:
+            DNSName: !GetAtt 'TorqueCloudFront.DomainName'
+            HostedZoneId: Z2FDTNDATAQYW2

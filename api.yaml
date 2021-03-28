@@ -6,7 +6,7 @@ basePath: /Prod
 schemes:
 - https
 paths:
-  /api:
+  /api/:
     x-amazon-apigateway-any-method:
       produces:
       - application/json

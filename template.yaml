@@ -51,41 +51,41 @@ Resources:
         Variables:
           ServiceApiFunction: !Ref ServiceApiFunction
     
-    APIBasePathMapping:
-        Type: 'AWS::ApiGateway::BasePathMapping'
-        Properties:
-          Stage: !Ref ServiceApi.Stage
-          DomainName: !Ref APIDomainName
-          RestApiId: !Ref ServiceApi
+    # APIBasePathMapping:
+    #     Type: 'AWS::ApiGateway::BasePathMapping'
+    #     Properties:
+    #       Stage: !Ref ServiceApi.Stage
+    #       DomainName: !Ref APIDomainName
+    #       RestApiId: !Ref ServiceApi
     
-    APIDomainName:
-      Type: 'AWS::ApiGateway::DomainName'
-      Properties:
-        SecurityPolicy: TLS_1_2
-        RegionalCertificateArn:
-          Ref: SslCert
-        DomainName:
-          Fn::Join: [ '', [ Ref: ServiceSubDomainName, Ref: Namespace, '.', Ref: RootUrl ] ]
-        EndpointConfiguration:
-          Types: ['REGIONAL']
+    # APIDomainName:
+    #   Type: 'AWS::ApiGateway::DomainName'
+    #   Properties:
+    #     SecurityPolicy: TLS_1_2
+    #     RegionalCertificateArn:
+    #       Ref: SslCert
+    #     DomainName:
+    #       Fn::Join: [ '', [ Ref: ServiceSubDomainName,'.', Ref: Namespace, '.', Ref: RootUrl ] ]
+    #     EndpointConfiguration:
+    #       Types: ['REGIONAL']
     
-    APIDomain:
-      Type: 'AWS::Route53::RecordSetGroup'
-      Properties:
-        HostedZoneName:
-          Fn::Join: [ '', [ Ref: RootUrl, '.' ] ]
-        RecordSets:
-          - Name:
-              Ref: APIDomainName
-            Type: A
-            AliasTarget:
-              DNSName:
-                Fn::GetAtt: [APIDomainName, RegionalDomainName]
-              HostedZoneId:
-                Fn::GetAtt: [APIDomainName, RegionalHostedZoneId]
+    # APIDomain:
+    #   Type: 'AWS::Route53::RecordSetGroup'
+    #   Properties:
+    #     HostedZoneName:
+    #       Fn::Join: [ '', [ Ref: RootUrl, '.' ] ]
+    #     RecordSets:
+    #       - Name:
+    #           Ref: APIDomainName
+    #         Type: A
+    #         AliasTarget:
+    #           DNSName:
+    #             Fn::GetAtt: [APIDomainName, RegionalDomainName]
+    #           HostedZoneId:
+    #             Fn::GetAtt: [APIDomainName, RegionalHostedZoneId]
 
                 
-    ServiceApiFunction2:
+    ServiceApiFunction:
       Type: AWS::Serverless::Function
       Properties:
         CodeUri: ./service
@@ -116,11 +116,11 @@ Resources:
               
  
 Outputs:
-  APIDomainName:
-    Description: 'API domain name'
-    Value:
-      Ref: APIDomainName
-  # LambdaServiceApiLogs:
-  #   Description: "Api Lambda Logs"
-  #   Value: !Sub "https://console.aws.amazon.com/cloudwatch/home?region=${AWS::Region}#logStream:group=/aws/lambda/${ServiceApiFunction};streamFilter=typeLogStreamPrefix"
+  # APIDomainName:
+  #   Description: 'API domain name'
+  #   Value:
+  #     Ref: APIDomainName
+  LambdaServiceApiLogs:
+    Description: "Api Lambda Logs"
+    Value: !Sub "https://console.aws.amazon.com/cloudwatch/home?region=${AWS::Region}#logStream:group=/aws/lambda/${ServiceApiFunction};streamFilter=typeLogStreamPrefix"
 

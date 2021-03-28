@@ -85,7 +85,7 @@ Resources:
                 Fn::GetAtt: [APIDomainName, RegionalHostedZoneId]
 
                 
-    ServiceApiFunction:
+    ServiceApiFunction2:
       Type: AWS::Serverless::Function
       Properties:
         CodeUri: ./service
@@ -120,7 +120,7 @@ Outputs:
     Description: 'API domain name'
     Value:
       Ref: APIDomainName
-  LambdaServiceApiLogs:
-    Description: "Api Lambda Logs"
-    Value: !Sub "https://console.aws.amazon.com/cloudwatch/home?region=${AWS::Region}#logStream:group=/aws/lambda/${ServiceApiFunction};streamFilter=typeLogStreamPrefix"
+  # LambdaServiceApiLogs:
+  #   Description: "Api Lambda Logs"
+  #   Value: !Sub "https://console.aws.amazon.com/cloudwatch/home?region=${AWS::Region}#logStream:group=/aws/lambda/${ServiceApiFunction};streamFilter=typeLogStreamPrefix"
 

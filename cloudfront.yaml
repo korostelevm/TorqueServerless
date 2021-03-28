@@ -4,83 +4,30 @@ Transform: AWS::Serverless-2016-10-31
 Description: Serverless Express Microfrontend
 
 Parameters:
+  ServiceSubDomainName:
+    Type: String
+    Default: 'torque'
   RootUrl:
     Type: String
-    Default: 'ha.wtf'
+    Default: '{{resolve:ssm:/account/root-url:1}}'
   SslCert: 
     Type: String
-    Default: '{{resolve:ssm:/ha-wtf/ssl-cert:1}}'
-  GitToken: 
-    Type: String
-    Default: '{{resolve:secretsmanager:GithubToken:SecretString:token}}'
+    Default: '{{resolve:ssm:/account/ssl-cert:1}}'
   Namespace:
     Type: String
     Default: ''
-  ServiceSubDomainName: 
-      Type: String
-      Default: 'www'
+  ServiceApi:
+    Type: String
+    Default: ''
+  ServiceApiStage:
+    Type: String
+    Default: ''
       
 Resources:
-  Builder:
-    Type: AWS::Serverless::Application
-    Properties:
-      Location: ./builder.yaml
-      # Parameters:
-      #   # Optional parameter that can have default value overridden
-      #   # ParameterName1: 15 # Uncomment to override default value
-      #   # Required parameter that needs value to be provided
-      #   ParameterName2: YOUR_VALUE
-  ServiceApi:
-    Type: AWS::Serverless::Api
-    Properties:
-      DefinitionUri: ./api.yaml
-      StageName: Prod
-      Variables:
-        ServiceApiFunction: !Ref ServiceApiFunction
-
-  ServiceApiFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: ./service
-      Handler: service.handler
-      Tracing: Active
-      MemorySize: 1024
-      Runtime: nodejs12.x
-      Timeout: 30
-      Policies:
-        - Statement:
-            [{
-                "Effect": "Allow",
-                "Action": ["dynamodb:*"],
-                "Resource": "*"
-            }]
-      Environment:
-        Variables:
-          ROOT_URL: !Ref RootUrl
-      Events:
-        ProxyApiRoot:
-          Type: Api
-          Properties:
-            RestApiId: !Ref ServiceApi
-            Path: /api/
-            Method: ANY
-        ProxyApiGreedy:
-          Type: Api
-          Properties:
-            RestApiId: !Ref ServiceApi
-            Path: /api/{proxy+}
-            Method: ANY
-        # ProxyIntegratorGreedy:
-        #   Type: HttpApi
-        #   Properties:
-        #     ApiId: !Ref IntegratorHttpApi
-        #     Path: /{proxy+}
-        #     Method: ANY
- 
   StaticS3Bucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Ref RootUrl
+      BucketName: !Join [ '', [ !Ref ServiceSubDomainName, !Ref Namespace, '.', !Ref RootUrl ] ]
       CorsConfiguration:
         CorsRules:
           - AllowedHeaders: ['*']
@@ -116,14 +63,13 @@ Resources:
       CloudFrontOriginAccessIdentityConfig:
         Comment: !Ref 'StaticS3Bucket'
 
-  WtfCloudFront:
+  TorqueCloudFront:
     Type: AWS::CloudFront::Distribution
     Properties:
       DistributionConfig:
         PriceClass: PriceClass_100
         Aliases: 
-          - !Join [ '', [ !Ref RootUrl ] ]
-          # - !Join [ '', [ !Ref ServiceSubDomainName, !Ref Namespace, '.', !Ref RootUrl ] ]
+          - !Join [ '', [ !Ref ServiceSubDomainName, !Ref Namespace, '.', !Ref RootUrl ] ]
         DefaultCacheBehavior:
           AllowedMethods:
             - HEAD
@@ -186,7 +132,7 @@ Resources:
             CustomOriginConfig:
               HTTPSPort: '443'
               OriginProtocolPolicy: https-only
-            OriginPath: !Join ['/', ['',!Ref ServiceApi.Stage]]
+            OriginPath: !Join ['/', ['',!Ref ServiceApiStage]]
             # OriginCustomHeaders:
             #   -
             #     HeaderName: Auth
@@ -200,23 +146,3 @@ Resources:
           Value: secure
 
   
-  SiteAliases:
-      Type: AWS::Route53::RecordSetGroup
-      Properties:
-        HostedZoneName: !Join [ '', [ !Ref RootUrl, '.' ] ]
-        RecordSets:
-          - Name: !Join [ '', [ !Ref RootUrl ] ]
-            Type: A
-            AliasTarget:
-              DNSName: !GetAtt 'WtfCloudFront.DomainName'
-              HostedZoneId: Z2FDTNDATAQYW2
-  
-Outputs:
-    ApiUrl:
-        Description: The API URL
-        Value: !Sub "https://${ServiceApi}.execute-api.${AWS::Region}.amazonaws.com/"
-
-    LambdaServiceApiLogs:
-        Description: "Api Lambda Logs"
-        Value: !Sub "https://console.aws.amazon.com/cloudwatch/home?region=${AWS::Region}#logStream:group=/aws/lambda/${ServiceApiFunction};streamFilter=typeLogStreamPrefix"
-    

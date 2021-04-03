@@ -50,6 +50,8 @@ Resources:
         StageName: Prod
         Variables:
           ServiceApiFunction: !Ref ServiceApiFunction
+          Db: !Ref ObdLogsTable
+          DbRole: !GetAtt ObdLogsAPIRole.Arn
     
     # APIBasePathMapping:
     #     Type: 'AWS::ApiGateway::BasePathMapping'
@@ -99,7 +101,45 @@ Resources:
           - AttributeName: sk
             AttributeType: N
         BillingMode: PAY_PER_REQUEST
-
+    
+    ObdLogsAPIRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: 2012-10-17
+          Statement:
+            -
+              Effect: Allow
+              Principal:
+                Service:
+                  - apigateway.amazonaws.com
+              Action:
+                - sts:AssumeRole
+        Policies:
+          -
+            PolicyName: ObdLogsAPIPolicy
+            PolicyDocument:
+              Version: 2012-10-17
+              Statement:
+                - Effect: Allow
+                  Action:
+                  - "dynamodb:PutItem"
+                  - "dynamodb:UpdateItem"
+                  - "dynamodb:DeleteItem"
+                  - "dynamodb:GetItem"
+                  - "dynamodb:Scan"
+                  Resource: !GetAtt ObdLogsTable.Arn
+                  
+          -
+            PolicyName: LambdaPolicy
+            PolicyDocument:
+              Version: 2012-10-17
+              Statement:
+                - Effect: Allow
+                  Action:
+                  - "lambda:*"
+                  Resource: !GetAtt ServiceApiFunction.Arn
+                  
     ServiceApiFunction:
       Type: AWS::Serverless::Function
       Properties:

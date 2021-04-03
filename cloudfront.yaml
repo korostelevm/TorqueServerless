@@ -116,6 +116,24 @@ Resources:
             ViewerProtocolPolicy: allow-all
             ForwardedValues: 
               QueryString: true
+          -
+            AllowedMethods:
+              - HEAD
+              - OPTIONS
+              - GET
+              - POST
+              - DELETE
+              - PUT
+              - PATCH
+            TargetOriginId: apigwobd
+            Compress: true
+            PathPattern: /obd
+            MaxTTL: '0'
+            MinTTL: '0'
+            DefaultTTL: '0'
+            ViewerProtocolPolicy: allow-all
+            ForwardedValues: 
+              QueryString: true
         CustomErrorResponses:
           - ErrorCachingMinTTL: 30
             ErrorCode: 403
@@ -139,6 +157,12 @@ Resources:
               OriginAccessIdentity: !Join ['/',['origin-access-identity', 'cloudfront', !Ref 'CloudFrontOriginAccessIdentity']]
           - DomainName: !Join ['.',[!Ref ServiceApi, 'execute-api', !Ref 'AWS::Region', 'amazonaws.com']]
             Id: apigw
+            CustomOriginConfig:
+              HTTPSPort: '443'
+              OriginProtocolPolicy: https-only
+            OriginPath: !Join ['/', ['',!Ref ServiceApiStage]]
+          - DomainName: !Join ['.',[!Ref ServiceApi, 'execute-api', !Ref 'AWS::Region', 'amazonaws.com']]
+            Id: apigwobd
             CustomOriginConfig:
               HTTPSPort: '443'
               OriginProtocolPolicy: https-only

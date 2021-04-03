@@ -113,7 +113,7 @@ Resources:
             MaxTTL: '0'
             MinTTL: '0'
             DefaultTTL: '0'
-            ViewerProtocolPolicy: redirect-to-https
+            ViewerProtocolPolicy: allow-all
             ForwardedValues: 
               QueryString: true
         CustomErrorResponses:

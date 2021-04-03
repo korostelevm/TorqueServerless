@@ -84,7 +84,22 @@ Resources:
     #           HostedZoneId:
     #             Fn::GetAtt: [APIDomainName, RegionalHostedZoneId]
 
-                
+    ObdLogsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ObdLogs
+        KeySchema:
+          - AttributeName: pk
+            KeyType: HASH
+          - AttributeName: sk
+            KeyType: RANGE
+        AttributeDefinitions:
+          - AttributeName: pk
+            AttributeType: S
+          - AttributeName: sk
+            AttributeType: N
+        BillingMode: PAY_PER_REQUEST
+
     ServiceApiFunction:
       Type: AWS::Serverless::Function
       Properties:

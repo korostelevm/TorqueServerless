@@ -98,23 +98,44 @@ paths:
           application/json: "{\"statusCode\": 200}"
         type: mock
   /obd:
+    get:
     # x-amazon-apigateway-any-method:
-    #   produces:
-    #   - application/json
+      produces:
+      - application/json
     #   parameters:
     #   - name: proxy
     #     in: path
     #     required: true
     #     type: string
-    #   responses: {}
+      responses:
+        200:
+          description: 200 response
+          schema:
+            $ref: "#/definitions/Empty"
       x-amazon-apigateway-integration:
-        httpMethod: POST
+        contentHandling: CONVERT_TO_TEXT
+        httpMethod: GET
         type: AWS
-        uri: { "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:dynamodb:action/PutItem" }
-        credentials: { Ref: DbRole }
-        # credentials: { "Fn::GetAtt": [ DbRole, Arn ] }
-        # requestTemplates:
-        #   application/json:
+        # uri: arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${stageVariables.ServiceApiFunction}/invocations
+        uri: "arn:aws:apigateway:us-east-1:dynamodb:action/Scan"
+        # uri: "arn:aws:apigateway:us-east-1:dynamodb:action/PutItem"
+        credentials: "arn:aws:iam::${AWS::AccountId}:role/${stageVariables.DbRole}"
+        # credentials: "arn:aws:iam::173028852725:role/TorqueServerless-ObdLogsAPIRole-9HVTQ05XBFX9"
+        # credentials: "${stageVariables.DbRole}"
+        # credentials: { "Fn::GetAtt": [ ObdLogsAPIRole, Arn ] }
+        # credentials: { "Fn::GetAtt": [ ObdLogsAPIRole, Arn ] }
+        requestTemplates:
+          # application/json: |-
+          #   sadf
+          #   sda!FindInMap fsd
+          application/json: |
+            {
+                "TableName": "ObdLogs"
+            }
+
+          # application/json: !Sub "{\n    \"TableName\": \"${stageVariables.Db}\",\n    \"ReturnConsumedCapacity\": \"TOTAL\"\n}"
+          # application/json: "{\n    \"TableName\": \"${stageVariables.Db}\",\n    \"ReturnConsumedCapacity\": \"TOTAL\"\n}"
+        #   application/json: 
         #     Fn::Sub:
         #       - |-
         #         {
@@ -128,15 +149,24 @@ paths:
         #             }
         #           }
         #         }
-        #       - { tableName: { Ref: Db } }
-        # responses:
-        #   default:
-        #     statusCode: 201
-        #     responseTemplates:
-        #       application/json: '#set($inputRoot = $input.path("$"))
-        #         {
-        #             "id": "$context.requestId"
-        #         }'
+        #       - { tableName: !Sub "${stageVariables.Db}" }
+        #       # - { tableName: { Ref: ObdLogsTable } }
+        responses: {
+            "default": {
+              "statusCode": "200"
+              # "responseTemplates": {
+              #   "application/json": "#set($inputRoot = $input.path('$'))\n[\n    #foreach($elem in $inputRoot.Items) {\n        \"id\": \"$elem.id.S\",\n        \"given_name\": \"$elem.given_name.S\",\n        \"description\": \"$elem.description.S\",\n        \"website_url\": \"$elem.website_url.S\"\n    }#if($foreach.hasNext),#end\n#end\n]"
+              # }
+            }
+          }
+        
+        passthroughBehavior: when_no_match
+
+            # responseTemplates:
+            #   application/json: '#set($inputRoot = $input.path("$"))
+            #     {
+            #         "id": "$context.requestId"
+            #     }'
 
       # x-amazon-apigateway-integration:
       #   uri: arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${stageVariables.ServiceApiFunction}/invocations

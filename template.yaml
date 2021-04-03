@@ -51,7 +51,8 @@ Resources:
         Variables:
           ServiceApiFunction: !Ref ServiceApiFunction
           Db: !Ref ObdLogsTable
-          DbRole: !GetAtt ObdLogsAPIRole.Arn
+          DbRole: !Ref ObdLogsAPIRole
+          # Region: AWS::Region
     
     # APIBasePathMapping:
     #     Type: 'AWS::ApiGateway::BasePathMapping'

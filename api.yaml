@@ -114,11 +114,11 @@ paths:
             $ref: "#/definitions/Empty"
       x-amazon-apigateway-integration:
         contentHandling: CONVERT_TO_TEXT
-        httpMethod: GET
+        httpMethod: POST
         type: AWS
         # uri: arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${stageVariables.ServiceApiFunction}/invocations
-        uri: "arn:aws:apigateway:us-east-1:dynamodb:action/Scan"
-        # uri: "arn:aws:apigateway:us-east-1:dynamodb:action/PutItem"
+        # uri: "arn:aws:apigateway:us-east-1:dynamodb:action/Scan"
+        uri: "arn:aws:apigateway:us-east-1:dynamodb:action/PutItem"
         credentials: "arn:aws:iam::${AWS::AccountId}:role/${stageVariables.DbRole}"
         # credentials: "arn:aws:iam::173028852725:role/TorqueServerless-ObdLogsAPIRole-9HVTQ05XBFX9"
         # credentials: "${stageVariables.DbRole}"
@@ -130,8 +130,24 @@ paths:
           #   sda!FindInMap fsd
           application/json: |
             {
-                "TableName": "ObdLogs"
+                "aaa":"$stageVariables",
+                "TableName": "$stageVariables.Db",
+                "Item":{
+                  "pk":{
+                    "S": "$input.params.querystring.pk"
+                  },
+                  "pk":{
+                    "N": "$input.params.querystring.sk"
+                  },
+                  "ff":{
+                    "S": "$input.params()"
+                  }
+                }
             }
+          # application/json: |
+          #   {
+          #       "TableName": "ObdLogs"
+          #   }
 
           # application/json: !Sub "{\n    \"TableName\": \"${stageVariables.Db}\",\n    \"ReturnConsumedCapacity\": \"TOTAL\"\n}"
           # application/json: "{\n    \"TableName\": \"${stageVariables.Db}\",\n    \"ReturnConsumedCapacity\": \"TOTAL\"\n}"

@@ -140,33 +140,16 @@ paths:
                     "N": "$input.params.querystring.sk"
                   },
                   "ff":{
-                    "S": "$input.params()"
+                    "S": "$input.params().querystring"
+                  },
+                  "dd":{
+                      #foreach($p in $input.params().querystring.keySet())
+                      "$p" : {"S":"$input.params().querystring.get($p)"}
+                      #if($foreach.hasNext),#end
+                      #end
                   }
                 }
             }
-          # application/json: |
-          #   {
-          #       "TableName": "ObdLogs"
-          #   }
-
-          # application/json: !Sub "{\n    \"TableName\": \"${stageVariables.Db}\",\n    \"ReturnConsumedCapacity\": \"TOTAL\"\n}"
-          # application/json: "{\n    \"TableName\": \"${stageVariables.Db}\",\n    \"ReturnConsumedCapacity\": \"TOTAL\"\n}"
-        #   application/json: 
-        #     Fn::Sub:
-        #       - |-
-        #         {
-        #           "TableName": "${tableName}",
-        #           "Item": {
-        #             "pk": {
-        #               "S": "$context.requestId"
-        #             },
-        #             "productname": {
-        #               "S": "$input.path("$.name")"
-        #             }
-        #           }
-        #         }
-        #       - { tableName: !Sub "${stageVariables.Db}" }
-        #       # - { tableName: { Ref: ObdLogsTable } }
         responses: {
             "default": {
               "statusCode": "200"

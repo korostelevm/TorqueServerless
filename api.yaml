@@ -144,10 +144,10 @@ paths:
                   },
                   "xx":{
                       #foreach($p in $input.params().querystring.keySet())
-                        #if($foreach.hasNext && $input.params().querystring.get($input.params().querystring.keySet()[$foreach.count]) != "" ),#end
                         #if($input.params().querystring.get($p) != "")
                           "$p" : {"S":"$input.params().querystring.get($p)"}
                         #end
+                        #if($foreach.hasNext && $input.params().querystring.get($input.params().querystring.keySet()[$foreach.count]) == "" ),#end
                       #end
                   }
                 }

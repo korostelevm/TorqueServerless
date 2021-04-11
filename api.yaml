@@ -137,15 +137,17 @@ paths:
                     "S": "$input.params.querystring.pk"
                   },
                   "pk":{
-                    "N": "$input.params.querystring.sk"
+                    "N": "$input.params().querystring.get('id')"
                   },
                   "ff":{
                     "S": "$input.params().querystring"
                   },
-                  "dd":{
+                  "xx":{
                       #foreach($p in $input.params().querystring.keySet())
-                      "$p" : {"S":"$input.params().querystring.get($p)"}
-                      #if($foreach.hasNext),#end
+                        #if($foreach.hasNext && $input.params().querystring.get($input.params().querystring.keySet()[$foreach.count]) != "" ),#end
+                        #if($input.params().querystring.get($p) != "")
+                          "$p" : {"S":"$input.params().querystring.get($p)"}
+                        #end
                       #end
                   }
                 }

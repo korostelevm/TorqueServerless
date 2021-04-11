@@ -8,9 +8,7 @@ serverless torque pro data logger
 
 
 ```
-DbRole	TorqueServerless-ObdLogsAPIRole-9HVTQ05XBFX9	 
-ServiceApiFunction	TorqueServerless-ServiceApiFunction-L26JQMLO27J5	 
-Db	ObdLogs
+
 
 eml=&id=0f607264fc6318a92b9e13c65db7cd3c&kff1001=0.0&kff1005=-75.11684333&kff1006=40.06796381&kff1007=0.0&kff1010=18.62078857421875&kff1204=4.7170434&kff1220=0.0058844895&kff1221=-0.22647662&kff1222=1.2626405&kff1223=0.3818174&kff1239=12.873063&kff123a=8.0&kff123b=0.0&kff1266=0.0&kff1267=0.0&kff1270=1026.548&kff129a=11.0&session=1617454617986&time=1617454731910&v=8
 ```

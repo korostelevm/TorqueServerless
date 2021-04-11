@@ -101,7 +101,7 @@ paths:
     get:
     # x-amazon-apigateway-any-method:
       produces:
-      - application/json
+      - text/html
     #   parameters:
     #   - name: proxy
     #     in: path
@@ -134,7 +134,7 @@ paths:
                 "TableName": "$stageVariables.Db",
                 "Item":{
                   "pk":{
-                    "S": "$input.params().querystring.get('id')"
+                    "S": "$input.params().querystring.get('session')"
                   },
                   "sk":{
                     "N": "$input.params().querystring.get('time')"
@@ -153,7 +153,11 @@ paths:
 
         responses: {
             "default": {
-              "statusCode": "200"
+              "statusCode": "200",
+              "contentHandling":"CONVERT_TO_TEXT",
+              "responseTemplates": {
+                "text/html":"OK!"
+              }
               # "responseTemplates": {
               #   "application/json": "#set($inputRoot = $input.path('$'))\n[\n    #foreach($elem in $inputRoot.Items) {\n        \"id\": \"$elem.id.S\",\n        \"given_name\": \"$elem.given_name.S\",\n        \"description\": \"$elem.description.S\",\n        \"website_url\": \"$elem.website_url.S\"\n    }#if($foreach.hasNext),#end\n#end\n]"
               # }

@@ -129,29 +129,28 @@ paths:
           #   sadf
           #   sda!FindInMap fsd
           application/json: |
-            {
+           {
                 "aaa":"$stageVariables",
                 "TableName": "$stageVariables.Db",
                 "Item":{
                   "pk":{
-                    "S": "$input.params.querystring.pk"
+                    "S": "$input.params().querystring.get('id')"
                   },
-                  "pk":{
-                    "N": "$input.params().querystring.get('id')"
+                  "sk":{
+                    "N": "$input.params().querystring.get('time')"
                   },
-                  "ff":{
-                    "S": "$input.params().querystring"
-                  },
-                  "xx":{
-                      #foreach($p in $input.params().querystring.keySet())
-                        #if($input.params().querystring.get($p) != "")
-                          "$p" : {"S":"$input.params().querystring.get($p)"}
-                        #end
-                        #if($foreach.hasNext && $input.params().querystring.get($input.params().querystring.keySet()[$foreach.count]) == "" ),#end
-                      #end
-                  }
+                #set ($data = {})
+                #foreach($p in $input.params().querystring.keySet())
+                    #if($input.params().querystring.get($p) != "")
+                      #set( $data[$p] = $input.params().querystring.get($p))
+                    #end
+                  #end
+                  #foreach($p in $data.keySet())
+                    "$p" : {"S":"$data.get($p)"}#if($foreach.hasNext),#end
+                  #end
                 }
             }
+
         responses: {
             "default": {
               "statusCode": "200"
